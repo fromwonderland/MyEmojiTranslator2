@@ -102,6 +102,55 @@
   $("#clearFr").addEventListener("click", () => { fr.value = ""; render(); fr.focus(); });
   $("#clearEmoji").addEventListener("click", () => { em.value = ""; em.focus(); });
 
+  /* ---------- dictée vocale (Web Speech API) ---------- */
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const micBtn = $("#micBtn");
+  let rec = null, listening = false, base = "";
+
+  function setListening(on) {
+    listening = on;
+    micBtn.classList.toggle("listening", on);
+    micBtn.setAttribute("aria-pressed", on);
+    micBtn.title = on ? "Arrêter la dictée" : "Dictée vocale";
+    $("#micStatus").hidden = !on;
+  }
+
+  if (SR) {
+    rec = new SR();
+    rec.lang = "fr-FR";
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.onresult = (ev) => {
+      let finals = "", interim = "";
+      for (let i = 0; i < ev.results.length; i++) {
+        const t = ev.results[i][0].transcript;
+        if (ev.results[i].isFinal) finals += t; else interim += t;
+      }
+      const spoken = (finals + interim).trim();
+      fr.value = (base + (base && spoken ? " " : "") + spoken).slice(0, 1000);
+      render();
+    };
+    rec.onerror = (ev) => {
+      const msgs = {
+        "not-allowed": "Accès au micro refusé 🙊 autorise-le dans ton navigateur",
+        "service-not-allowed": "Dictée indisponible ici 🙊 essaie avec Chrome ou Edge",
+        "no-speech": "Je n'ai rien entendu 👂 réessaie !",
+        "audio-capture": "Aucun micro détecté 🎤❓",
+        "network": "La dictée a besoin d'Internet 🌐",
+      };
+      toast(msgs[ev.error] || "Oups, la dictée a planté 😕");
+    };
+    rec.onend = () => { if (listening) { setListening(false); saveHisto(); } };
+  }
+
+  micBtn.addEventListener("click", () => {
+    if (!rec) { toast("Ton navigateur ne gère pas la dictée 😢 essaie Chrome ou Edge"); return; }
+    if (listening) { rec.stop(); return; }
+    base = fr.value.trim();
+    try { rec.start(); setListening(true); toast("Parle, je t'écoute 🎙️"); }
+    catch { toast("La dictée est déjà en cours 🎙️"); }
+  });
+
   $("#toFrBtn").addEventListener("click", () => {
     if (!em.value.trim()) { toast("Ajoute d'abord des emojis 😉"); em.focus(); return; }
     const res = T.toFrench(em.value);

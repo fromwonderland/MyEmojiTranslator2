@@ -92,6 +92,12 @@ textarea::placeholder { color: #a79fb8; font-size: 1rem; }
 }
 .icon-btn { width: 38px; height: 36px; font-size: 1.1rem; padding: 0; }
 .icon-btn:hover { background: var(--sky); }
+.mic-btn.listening { background: #ff6b81; animation: pulse 1.1s ease-in-out infinite; }
+@keyframes pulse {
+  0%, 100% { box-shadow: var(--shadow-sm), 0 0 0 0 rgba(255, 107, 129, .6); }
+  50% { box-shadow: var(--shadow-sm), 0 0 0 8px rgba(255, 107, 129, 0); }
+}
+.mic-status { margin-right: auto; color: #e0405a; font-weight: 500; }
 .copy-btn { padding: 0 12px; height: 36px; font-weight: 600; background: var(--mint); }
 .copy-btn:hover { background: #5fd3ad; }
 .copy-btn.done { background: var(--yellow); }

@@ -31,11 +31,12 @@
           <div class="tools">
             <button class="icon-btn" id="randomBtn" title="Phrase au hasard">🎲</button>
             <button class="icon-btn" id="clearFr" title="Effacer">🧽</button>
+            <button class="icon-btn mic-btn" id="micBtn" title="Dictée vocale" aria-label="Dictée vocale" aria-pressed="false">🎤</button>
             <button class="copy-btn" data-copy="frInput" title="Copier le texte">📋 Copier</button>
           </div>
         </div>
         <textarea id="frInput" rows="3" maxlength="1000" placeholder="Tape ta phrase ici… ex : « Je t'aime, on mange une pizza ce soir ? »"></textarea>
-        <div class="field-foot"><span id="frCount">0 / 1000</span></div>
+        <div class="field-foot"><span class="mic-status" id="micStatus" hidden>🎙️ Je t'écoute… parle !</span><span id="frCount">0 / 1000</span></div>
       </div>
 
       <div class="middle">
