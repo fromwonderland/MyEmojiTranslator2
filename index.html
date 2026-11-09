@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Traduc'Moji</title>
+  <meta name="description" content="Traducteur de texte français en emojis, avec dictionnaire et mini-jeux.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤪</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="bg-floaters" aria-hidden="true"></div>
+
+  <header class="top">
+    <div class="logo">
+      <span class="logo-emoji" id="logoEmoji">🤪</span>
+      <h1>Traduc'<span>Moji</span></h1>
+    </div>
+    <p class="tagline">Écris en français, parle en emoji ✨</p>
+  </header>
+
+  <main class="wrap">
+    <!-- ================= TRADUCTEUR ================= -->
+    <section class="translator card">
+      <div class="field">
+        <div class="field-head">
+          <label for="frInput"><span class="flag">🥖</span> Français</label>
+          <div class="tools">
+            <button class="icon-btn" id="randomBtn" title="Phrase au hasard">🎲</button>
+            <button class="icon-btn" id="clearFr" title="Effacer">🧽</button>
+            <button class="copy-btn" data-copy="frInput" title="Copier le texte">📋 Copier</button>
+          </div>
+        </div>
+        <textarea id="frInput" rows="3" maxlength="1000" placeholder="Tape ta phrase ici… ex : « Je t'aime, on mange une pizza ce soir ? »"></textarea>
+        <div class="field-foot"><span id="frCount">0 / 1000</span></div>
+      </div>
+
+      <div class="middle">
+        <div class="mode-switch" role="radiogroup" aria-label="Mode de traduction">
+          <button class="mode active" data-mode="mix" role="radio" aria-checked="true" title="Garde les mots sans emoji">🔤 Mixte</button>
+          <button class="mode" data-mode="pure" role="radio" aria-checked="false" title="Uniquement des emojis">😶 100 % emoji</button>
+        </div>
+        <button class="swap-btn" id="toFrBtn" title="Traduire les emojis en français">🔄 Emoji → Français</button>
+      </div>
+
+      <div class="field emoji-field">
+        <div class="field-head">
+          <label for="emojiOutput"><span class="flag">😀</span> Emoji</label>
+          <div class="tools">
+            <button class="icon-btn" id="clearEmoji" title="Effacer">🧽</button>
+            <button class="copy-btn" data-copy="emojiOutput" title="Copier les emojis">📋 Copier</button>
+          </div>
+        </div>
+        <textarea id="emojiOutput" rows="3" placeholder="Tes emojis apparaîtront ici 🪄 (tu peux aussi les modifier ou piocher dans le dico)"></textarea>
+        <div class="field-foot">
+          <div class="meter" title="Pourcentage de mots transformés en emojis">
+            <div class="meter-bar"><span id="meterFill"></span></div>
+            <span id="meterLabel">Emojification : 0 %</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="details" id="details" aria-live="polite"></div>
+    </section>
+
+    <!-- ================= ONGLETS ================= -->
+    <nav class="tabs" role="tablist">
+      <button class="tab active" role="tab" data-tab="dico" aria-selected="true">📖 Dico</button>
+      <button class="tab" role="tab" data-tab="jeux" aria-selected="false">🎮 Mini-jeux</button>
+      <button class="tab" role="tab" data-tab="idees" aria-selected="false">💡 Idées</button>
+      <button class="tab" role="tab" data-tab="histo" aria-selected="false">🕘 Historique</button>
+    </nav>
+
+    <!-- Dictionnaire -->
+    <section class="panel card active" id="panel-dico" role="tabpanel">
+      <div class="dico-top">
+        <input type="search" id="dicoSearch" placeholder="🔍 Chercher un emoji (ex : chat, pizza, fête…)">
+        <span class="hint">Clique sur un emoji pour l'ajouter ✍️</span>
+      </div>
+      <div class="cats" id="cats"></div>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <!-- Mini-jeux -->
+    <section class="panel card" id="panel-jeux" role="tabpanel" hidden>
+      <div class="game-pick">
+        <button class="game-btn active" data-game="rebus"><b>🧩 Rébus</b><small>Devine l'expression cachée</small></button>
+        <button class="game-btn" data-game="express"><b>⚡ Emoji express</b><small>30 s pour trouver le bon emoji</small></button>
+      </div>
+
+      <div class="game" id="game-rebus">
+        <div class="score-row">
+          <span class="pill">🏆 Score : <b id="rebusScore">0</b></span>
+          <span class="pill">🔥 Série : <b id="rebusStreak">0</b></span>
+        </div>
+        <div class="rebus-emoji" id="rebusEmoji">🧩</div>
+        <div class="choices" id="rebusChoices"></div>
+        <div class="game-actions">
+          <button class="ghost-btn" id="rebusHint">💡 Indice</button>
+          <button class="ghost-btn" id="rebusNext">⏭️ Suivant</button>
+        </div>
+        <p class="feedback" id="rebusFeedback"></p>
+      </div>
+
+      <div class="game" id="game-express" hidden>
+        <div class="score-row">
+          <span class="pill">🏆 Score : <b id="expScore">0</b></span>
+          <span class="pill">⏱️ <b id="expTime">30</b> s</span>
+          <span class="pill">⭐ Record : <b id="expBest">0</b></span>
+        </div>
+        <div class="express-word" id="expWord">Prêt·e ?</div>
+        <div class="choices emoji-choices" id="expChoices"></div>
+        <div class="game-actions">
+          <button class="big-btn" id="expStart">▶️ Lancer la partie</button>
+        </div>
+        <p class="feedback" id="expFeedback"></p>
+      </div>
+    </section>
+
+    <!-- Idées / suggestions -->
+    <section class="panel card" id="panel-idees" role="tabpanel" hidden>
+      <div class="daily">
+        <div class="daily-emoji" id="dailyEmoji">⭐</div>
+        <div>
+          <h3>Emoji du jour</h3>
+          <p id="dailyText">…</p>
+        </div>
+      </div>
+      <h3 class="sub">Phrases à essayer</h3>
+      <div class="chips" id="suggestions"></div>
+      <h3 class="sub">Petites astuces</h3>
+      <ul class="tips">
+        <li>🔤 <b>Mixte</b> garde les mots inconnus, <b>100 % emoji</b> ne garde que les emojis.</li>
+        <li>🔄 Écris ou colle des emojis en bas puis clique sur <b>Emoji → Français</b> pour les décoder.</li>
+        <li>✨ Les verbes conjugués sont reconnus : « je mange », « nous mangeons », « ils ont mangé »…</li>
+        <li>🚫 « ne … pas » devient 🚫, et les expressions comme « je t'aime » ou « bonne nuit » ont leur propre traduction.</li>
+      </ul>
+    </section>
+
+    <!-- Historique -->
+    <section class="panel card" id="panel-histo" role="tabpanel" hidden>
+      <div class="histo-head">
+        <h3 class="sub">Tes dernières traductions</h3>
+        <button class="ghost-btn" id="clearHisto">🗑️ Vider</button>
+      </div>
+      <ul class="histo" id="histo"></ul>
+      <p class="empty" id="histoEmpty">Rien pour l'instant… traduis une phrase, elle s'enregistrera ici (uniquement sur ton appareil).</p>
+    </section>
+  </main>
+
+  <footer class="foot">Fait avec 💛 et beaucoup de 🤪 — aucune donnée envoyée, tout reste dans ton navigateur.</footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/translator.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
