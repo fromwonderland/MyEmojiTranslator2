@@ -23,19 +23,79 @@
   }
 
   /* ---------- fond animé ---------- */
+  const bgBox = $(".bg-floaters");
+  const rand = (a, b) => a + Math.random() * (b - a);
   (function floaters() {
-    const box = $(".bg-floaters");
-    const set = ["😀", "🍕", "🐱", "✨", "🎉", "❤️", "🌈", "🤪", "🦄", "🍩", "🚀", "🌸"];
-    for (let i = 0; i < 12; i++) {
+    ["b1", "b2", "b3", "b4", "b5"].forEach((c) => {
+      const b = document.createElement("div");
+      b.className = "blob " + c;
+      bgBox.appendChild(b);
+    });
+    const set = shuffle(["😀", "🍕", "🐱", "✨", "🎉", "❤️", "🌈", "🤪", "🦄", "🍩", "🚀", "🌸", "🍉", "🦋", "🎈",
+      "🍓", "🐸", "💜", "⭐", "🍭", "🐙", "🌻", "🧁", "🎨", "🥑", "🐳", "🔥", "💎", "🍒", "🌺", "🦊", "🪐",
+      "🍋", "🐠", "🎁", "🍬", "💖", "🌵", "🎸", "🐝"]);
+    const W = window.innerWidth;
+    const n = W < 560 ? 18 : 40;
+    // Sur grand écran, la carte centrale cache le milieu : on place surtout les emojis sur les côtés
+    const side = W > 900 ? Math.max(6, ((W - 860) / 2 / W) * 100) : 0;   // largeur d'une marge en %
+    const xFor = (i) => {
+      if (!side || i % 4 === 3) return (i / n) * 100 + rand(-3, 3);       // 1 sur 4 n'importe où
+      const left = i % 2 === 0;
+      const p = rand(0, side + 4);
+      return left ? p - 2 : 100 - p - 2;
+    };
+    // 4 types de mouvement : monter, tomber, traverser, flotter sur place
+    const moves = ["rise", "rise", "rise", "fall", "cross", "bob"];
+    for (let i = 0; i < n; i++) {
+      const move = moves[i % moves.length];
       const s = document.createElement("span");
-      s.textContent = set[i];
-      s.style.left = (i * 8.3 + Math.random() * 5) + "%";
-      s.style.top = (Math.random() * 90) + "%";
-      s.style.animationDelay = (-Math.random() * 14) + "s";
-      s.style.fontSize = (1.5 + Math.random() * 1.5) + "rem";
-      box.appendChild(s);
+      s.className = "fl";
+      const dur = move === "bob" ? rand(5, 9) : move === "cross" ? rand(28, 45) : rand(18, 34);
+      s.style.setProperty("--x", move === "cross" ? "0%" : xFor(i).toFixed(1) + "%");
+      s.style.setProperty("--y", rand(5, 85).toFixed(0) + "vh");
+      s.style.setProperty("--move", move);
+      s.style.setProperty("--dur", dur.toFixed(1) + "s");
+      s.style.setProperty("--delay", (-rand(0, dur)).toFixed(1) + "s");
+      const big = Math.random() < .25;
+      s.style.setProperty("--size", (big ? rand(2.6, 3.6) : rand(1.3, 2.4)).toFixed(2) + "rem");
+      s.style.setProperty("--op", (big ? rand(.35, .5) : rand(.55, .85)).toFixed(2));
+      s.style.setProperty("--wiggle", ["sway", "sway", "spin", "pulse-pop"][Math.floor(Math.random() * 4)]);
+      s.style.setProperty("--wdur", rand(2.5, 6).toFixed(1) + "s");
+      const inner = document.createElement("i");
+      inner.textContent = set[i % set.length];
+      s.appendChild(inner);
+      bgBox.appendChild(s);
     }
   })();
+
+  // Les emojis d'une nouvelle traduction s'envolent dans le fond 🎈
+  let lastBurst = "";
+  function burst(text) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const seg = typeof Intl !== "undefined" && Intl.Segmenter ? [...new Intl.Segmenter("fr", { granularity: "grapheme" }).segment(text)].map((x) => x.segment) : Array.from(text);
+    const emos = seg.filter((g) => /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(g));
+    const fresh = emos.filter((e) => !lastBurst.includes(e));
+    lastBurst = text;
+    if (!fresh.length || bgBox.querySelectorAll(".burst").length > 14) return;
+    fresh.slice(-3).forEach((e, k) => {
+      const s = document.createElement("span");
+      s.className = "fl burst";
+      s.style.setProperty("--x", rand(8, 88).toFixed(0) + "%");
+      s.style.setProperty("--y", rand(70, 95).toFixed(0) + "vh");
+      s.style.setProperty("--dx", rand(-12, 12).toFixed(0) + "vw");
+      s.style.setProperty("--dur", rand(4, 7).toFixed(1) + "s");
+      s.style.setProperty("--size", rand(2, 3.2).toFixed(1) + "rem");
+      s.style.setProperty("--op", ".9");
+      s.style.setProperty("--wiggle", "sway");
+      s.style.setProperty("--wdur", "1.6s");
+      s.style.animationDelay = k * 0.25 + "s";
+      const inner = document.createElement("i");
+      inner.textContent = e;
+      s.appendChild(inner);
+      s.addEventListener("animationend", (ev) => { if (ev.target === s) s.remove(); });
+      bgBox.appendChild(s);
+    });
+  }
 
   const logos = ["🤪", "😎", "🥳", "🤩", "😜", "🦄", "👽", "🤖", "🐸"];
   $("#logoEmoji").addEventListener("click", (e) => { e.currentTarget.textContent = pick(logos); });
@@ -52,6 +112,7 @@
     $("#frCount").textContent = txt.length + " / 1000";
     const r = T.toEmoji(txt, mode);
     em.value = r.text;
+    burst(r.text);
     const pct = r.total ? Math.round((r.known / r.total) * 100) : 0;
     $("#meterFill").style.width = pct + "%";
     $("#meterLabel").textContent = "Emojification : " + pct + " %";

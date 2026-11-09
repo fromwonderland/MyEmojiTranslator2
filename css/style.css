@@ -42,10 +42,46 @@ h1, h3 { margin: 0; }
 
 /* ---------- emojis flottants en fond ---------- */
 .bg-floaters { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-.bg-floaters span {
-  position: absolute; font-size: 2rem; opacity: .22;
-  animation: float 14s ease-in-out infinite;
+
+/* taches de couleur qui dérivent lentement */
+.blob {
+  position: absolute; width: 46vmax; height: 46vmax; border-radius: 50%;
+  filter: blur(70px); opacity: .45; will-change: transform;
+  animation: drift-blob 26s ease-in-out infinite alternate;
 }
+.blob.b1 { background: var(--pink); left: -14vmax; top: -12vmax; }
+.blob.b2 { background: var(--sky); right: -16vmax; top: 18vh; animation-duration: 32s; animation-delay: -8s; }
+.blob.b3 { background: var(--yellow); left: 10vw; bottom: -20vmax; animation-duration: 28s; animation-delay: -15s; }
+.blob.b4 { background: var(--mint); right: 8vw; bottom: -18vmax; animation-duration: 36s; animation-delay: -4s; opacity: .35; }
+.blob.b5 { background: var(--lilac); left: 38vw; top: 30vh; width: 30vmax; height: 30vmax; animation-duration: 40s; opacity: .3; }
+@keyframes drift-blob {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(6vw, -5vh) scale(1.15); }
+  100% { transform: translate(-5vw, 6vh) scale(.92); }
+}
+
+/* emojis : l'enveloppe se déplace, l'emoji à l'intérieur se balance/tourne */
+.fl { position: absolute; left: var(--x); top: 0; will-change: transform; animation: var(--move) var(--dur) linear infinite; animation-delay: var(--delay); }
+.fl > i {
+  display: block; font-style: normal; line-height: 1; font-size: var(--size); opacity: var(--op);
+  animation: var(--wiggle) var(--wdur) ease-in-out infinite alternate; will-change: transform;
+}
+@keyframes rise { from { transform: translateY(112vh); } to { transform: translateY(-18vh); } }
+@keyframes fall { from { transform: translateY(-18vh); } to { transform: translateY(112vh); } }
+@keyframes cross { from { transform: translate(-30vw, var(--y)); } to { transform: translate(130vw, calc(var(--y) - 12vh)); } }
+@keyframes bob { 0% { transform: translateY(var(--y)); } 50% { transform: translateY(calc(var(--y) - 4vh)); } 100% { transform: translateY(var(--y)); } }
+@keyframes sway { from { transform: translateX(-28px) rotate(-18deg); } to { transform: translateX(28px) rotate(18deg); } }
+@keyframes spin { from { transform: rotate(0deg) scale(.9); } to { transform: rotate(360deg) scale(1.1); } }
+@keyframes pulse-pop { 0% { transform: scale(.85) rotate(-6deg); } 100% { transform: scale(1.2) rotate(8deg); } }
+
+/* emojis lâchés par une traduction : montent une seule fois */
+.fl.burst { animation: burst-up var(--dur) cubic-bezier(.25, .7, .4, 1) forwards; }
+@keyframes burst-up {
+  0% { transform: translate(0, var(--y)) scale(.3); opacity: 0; }
+  12% { opacity: 1; transform: translate(calc(var(--dx) * .2), calc(var(--y) - 6vh)) scale(1.1); }
+  100% { transform: translate(var(--dx), -20vh) scale(.9); opacity: 0; }
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0) rotate(-8deg); }
   50% { transform: translateY(-30px) rotate(8deg); }
@@ -316,4 +352,5 @@ textarea::placeholder { color: #a79fb8; font-size: 1rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+  .fl { transform: translateY(var(--y)); }   /* emojis immobiles mais répartis */
 }
