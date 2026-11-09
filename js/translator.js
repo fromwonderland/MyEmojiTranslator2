@@ -11,23 +11,55 @@
   const stripAccents = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
   const norm = (s) => s.toLowerCase().replace(/[’`´]/g, "'");
 
-  // Découpage : élisions (j' t' l'…), mots composés avec tiret, emojis, ponctuation, espaces
-  const TOKEN_RE = /(\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic}|\p{Emoji_Modifier})*|[0-9]️?⃣)|([\p{L}]+')|([\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*)|(\s+)|(.)/gu;
+
+  // Groupes : 1 emoji (dont drapeaux et touches 1️⃣) · 2 nombre décimal · 3 élision · 4 mot · 5 espaces
+  //           6 ponctuation (les suites « ?! », « !!! », « ... » restent groupées)
+  const TOKENS = new RegExp(
+    "(\\p{Extended_Pictographic}(?:\\uFE0F|\\u200D\\p{Extended_Pictographic}|\\p{Emoji_Modifier})*|[0-9]\\uFE0F?\\u20E3|\\p{Regional_Indicator}{2})" +
+    "|(\\d+(?:[.,]\\d+)+)" +
+    "|(\\p{L}+')" +
+    "|([\\p{L}\\p{N}]+(?:-[\\p{L}\\p{N}]+)*)" +
+    "|(\\s+)" +
+    "|([!?]+|\\.{2,}|[\\s\\S])", "gu");
 
   function tokenize(text) {
     const out = [];
     const t = norm(text);
     let m;
-    TOKEN_RE.lastIndex = 0;
-    // On garde l'original pour l'affichage (même longueur, norm ne change pas la taille sauf apostrophes 1:1)
-    while ((m = TOKEN_RE.exec(t))) {
+    TOKENS.lastIndex = 0;
+    // On garde l'original pour l'affichage (norm conserve la longueur : apostrophes remplacées 1 pour 1)
+    while ((m = TOKENS.exec(t))) {
       const raw = text.substr(m.index, m[0].length);
       if (m[1]) out.push({ type: "emoji", raw });
-      else if (m[2] || m[3]) out.push({ type: "word", raw, n: m[0] });
-      else if (m[4]) out.push({ type: "space", raw });
+      else if (m[2] || m[3] || m[4]) out.push({ type: "word", raw, n: m[0] });
+      else if (m[5]) out.push({ type: "space", raw });
       else out.push({ type: "punct", raw });
     }
     return out;
+  }
+
+  /* ---------- Assemblage avec la typographie française ----------
+     - emojis collés entre eux, mots séparés par une espace
+     - . , … ) ] collés au mot précédent
+     - ( [ collés au mot suivant
+     - ! ? : ; « » entourés d'espaces (règle française)
+     - guillemets droits " : ouvrant collé à droite, fermant collé à gauche */
+  const GLUE_BEFORE = /^[.,…)\]}]/;
+  const GLUE_AFTER = /^[(\[{]$/;
+  function assemble(pieces) {
+    let out = "", prev = null, quoteOpen = false;
+    for (const p of pieces) {
+      if (p.kind === "br") { out = out.trimEnd() + "\n"; prev = null; continue; }
+      let gb = false, ga = false;
+      if (p.kind === "punct") {
+        if (p.v === '"') { gb = quoteOpen; ga = !quoteOpen; quoteOpen = !quoteOpen; }
+        else { gb = GLUE_BEFORE.test(p.v); ga = GLUE_AFTER.test(p.v); }
+      }
+      if (prev && !gb && !prev.glueAfter && !(prev.kind === "emoji" && p.kind === "emoji")) out += " ";
+      out += p.v;
+      prev = { kind: p.kind, glueAfter: ga };
+    }
+    return out.trim();
   }
 
   /* ---------- Construction des index ---------- */
@@ -76,6 +108,7 @@
     "j'ai soif": "🙋🥤", "en retard": "⏰💨", "de tout mon coeur": "💯❤️",
     "de tout mon cœur": "💯❤️", "pas de souci": "👌", "pas de problème": "👌",
     "comment ça va": "👋❓", "ça va": "🆗", "n'importe quoi": "🤦",
+    "c'est-à-dire": "🟰", "c'est-a-dire": "🟰",
   };
   Object.entries(EXTRA).forEach(([k, e]) => {
     const toks = tokenize(k).filter((t) => t.type === "word").map((t) => t.n);
@@ -138,8 +171,14 @@
       if (e) return { e };
       if (c in window.VERBES_ALIAS) return window.VERBES_ALIAS[c] ? { e: window.VERBES_ALIAS[c] } : { skip: true };
     }
-    if (/^\d+$/.test(w)) {
-      return { e: [...w].map((d) => d + "️⃣").join("") };
+    // Nombres (entiers ou décimaux : 3,5 → 3️⃣,5️⃣)
+    if (/^\d+(?:[.,]\d+)*$/.test(w)) {
+      return { e: [...w].map((d) => (/\d/.test(d) ? d + "️⃣" : d)).join("") };
+    }
+    // Mot composé inconnu : on traduit chaque morceau (« grand-mère » déjà connu, « porte-clé » → 🚪🔑)
+    if (w.includes("-")) {
+      const parts = w.split("-").map(translateWord).filter((r) => r && r.e).map((r) => r.e);
+      if (parts.length) return { e: [...new Set(parts)].join("") };
     }
     return null;
   }
@@ -159,9 +198,15 @@
       if (t.type === "punct") {
         const p = t.raw;
         if (mode === "pure") {
-          if (p === "?") pieces.push({ kind: "emoji", v: "❓" });
-          else if (p === "!") pieces.push({ kind: "emoji", v: "❗" });
-        } else if (p !== "'" && p !== "-") pieces.push({ kind: "punct", v: p });
+          // ? → ❓  ! → ❗ (sans doubler un ❓ déjà produit par « quoi », « qui »…)
+          [...p].forEach((c, idx) => {
+            const e = c === "?" ? "❓" : c === "!" ? "❗" : null;
+            if (!e) return;
+            const last = pieces[pieces.length - 1];
+            if (idx === 0 && last && last.v === e) return;
+            pieces.push({ kind: "emoji", v: e });
+          });
+        } else if (!/^['’\-]$/.test(p)) pieces.push({ kind: "punct", v: p });
         continue;
       }
 
@@ -204,18 +249,7 @@
       }
     }
 
-    // Assemblage : emojis collés entre eux, mots séparés par des espaces
-    let out = "";
-    let prev = null;
-    for (const p of pieces) {
-      if (p.kind === "br") { out = out.trimEnd() + "\n"; prev = null; continue; }
-      if (prev && !(p.kind === "punct" && /^[.,;:)…]$/.test(p.v))) {
-        if (p.kind === "word" || prev.kind === "word" || prev.kind === "punct" || p.kind === "punct") out += " ";
-      }
-      out += p.v;
-      prev = p;
-    }
-    return { text: out.trim(), details, known, total };
+    return { text: assemble(pieces), details, known, total };
   }
 
   /* ---------- Traduction Emoji → FR ---------- */
@@ -227,19 +261,34 @@
   const reverseBare = new Map([...reverse].map(([e, l]) => [bare(e), l]));
 
   function toFrench(text) {
-    const out = [];
+    const pieces = [];
     let buf = "";
-    const flush = () => { if (buf) { out.push(buf); buf = ""; } };
+    const flush = () => { if (buf) { pieces.push({ kind: "word", v: buf }); buf = ""; } };
     for (const g of graphemes(text)) {
-      if (g === "\n") { flush(); out.push("\n"); continue; }
-      if (/^\s+$/.test(g)) { flush(); continue; }
+      if (g === "\n") { flush(); pieces.push({ kind: "br" }); continue; }
+      if (/^\s+$/.test(g)) {
+        flush();
+        const last = pieces[pieces.length - 1];
+        if (last) last.justAdded = false;
+        continue;
+      }
       const l = reverse.get(g) || reverseBare.get(bare(g));
-      if (l) { flush(); out.push(l); }
-      else if (/\p{Extended_Pictographic}/u.test(g)) { flush(); out.push(g); }
+      if (l) { flush(); pieces.push({ kind: "word", v: l }); }
+      else if (/\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(g)) { flush(); pieces.push({ kind: "word", v: g }); }
+      else if (/^[\p{P}]$/u.test(g) && !/['’\-]/.test(g)) {
+        // ponctuation : les suites « ?! » ou « ... » restent groupées
+        flush();
+        const last = pieces[pieces.length - 1];
+        if (last && last.kind === "punct" && /^[!?.]+$/.test(last.v + g) && last.justAdded) last.v += g;
+        else pieces.push({ kind: "punct", v: g, justAdded: true });
+        continue;
+      }
       else buf += g;   // texte normal : on recolle les lettres
+      const last = pieces[pieces.length - 1];
+      if (last) last.justAdded = false;
     }
     flush();
-    return out.join(" ").replace(/ ?\n ?/g, "\n").trim();
+    return assemble(pieces);
   }
 
   window.Translator = { toEmoji, toFrench, all, reverse, tokenize };
