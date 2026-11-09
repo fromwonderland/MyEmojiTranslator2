@@ -419,11 +419,273 @@
     }, 1000);
   });
 
+  /* ---------- outils communs aux nouveaux jeux ---------- */
+  const graph = (s) => (typeof Intl !== "undefined" && Intl.Segmenter
+    ? [...new Intl.Segmenter("fr", { granularity: "grapheme" }).segment(s)].map((x) => x.segment) : Array.from(s));
+  const bareE = (e) => e.replace(/️/g, "");
+  const PRONOMS = new Set(["🙋", "👉", "👤", "👥"]);
+  // emojis « dessinables » : un seul emoji, catégories concrètes
+  const playable = (cats) => T.all.filter((it) => cats.includes(it.cat) && graph(it.e).length === 1 && !PRONOMS.has(it.e));
+  const catName = (id) => (window.EMOJI_DICT.find((c) => c.id === id) || {}).nom || id;
+  function celebrate(s) { lastBurst = ""; burst(s); }
+
+  /* =========================================================
+     MINI-JEU 3 : HISTOIRE EN EMOJIS (jeu de soirée)
+     ========================================================= */
+  const storyPool = playable(["emotions", "gens", "metiers", "animaux", "meteo", "nourriture", "activites", "lieux", "objets", "fetes"]);
+  let storyDraw = [], stories = [], storySec = 0, storyTimer = null, storyLeft = 0;
+
+  function renderDraw() {
+    const box = $("#storyDraw");
+    box.innerHTML = "";
+    storyDraw.forEach((it, idx) => {
+      const b = document.createElement("button");
+      b.className = "draw-card";
+      b.title = "« " + it.label + " » — touche pour changer";
+      b.innerHTML = "<span></span><small></small>";
+      b.firstChild.textContent = it.e;
+      b.lastChild.textContent = it.label;
+      b.style.animationDelay = idx * 0.08 + "s";
+      b.addEventListener("click", () => {
+        const used = new Set(storyDraw.map((x) => x.e));
+        storyDraw[idx] = pick(storyPool.filter((x) => !used.has(x.e)));
+        renderDraw();
+      });
+      box.appendChild(b);
+    });
+  }
+  function rollStory() {
+    storyDraw = shuffle(storyPool).slice(0, 5);
+    renderDraw();
+    $("#storyFeedback").textContent = "";
+    startStoryTimer();
+  }
+  function startStoryTimer() {
+    clearInterval(storyTimer);
+    const t = $("#storyTimer");
+    if (!storySec) { t.hidden = true; return; }
+    storyLeft = storySec;
+    t.hidden = false;
+    t.textContent = storyLeft + " s";
+    t.classList.remove("urgent");
+    storyTimer = setInterval(() => {
+      storyLeft--;
+      t.textContent = Math.max(0, storyLeft) + " s";
+      t.classList.toggle("urgent", storyLeft <= 10);
+      if (storyLeft <= 0) {
+        clearInterval(storyTimer);
+        t.textContent = "⏰ Stylos en l'air !";
+        toast("⏰ Temps écoulé : stylos en l'air !");
+      }
+    }, 1000);
+  }
+  $$(".timer-pick .chip").forEach((c) => c.addEventListener("click", () => {
+    storySec = +c.dataset.sec;
+    $$(".timer-pick .chip").forEach((x) => { x.classList.toggle("active", x === c); x.setAttribute("aria-checked", x === c); });
+    if (storyDraw.length) startStoryTimer();
+  }));
+
+  // fidélité : combien des 5 emojis tirés se retrouvent quand on retraduit l'histoire
+  function fidelity(text) {
+    const tr = T.toEmoji(text, "pure").text;
+    const got = new Set(graph(tr).map(bareE));
+    const hits = storyDraw.filter((it) => got.has(bareE(it.e)));
+    return { tr, hits: hits.length };
+  }
+  function renderStories(winner) {
+    const ul = $("#stories");
+    ul.innerHTML = "";
+    stories.forEach((s, idx) => {
+      const li = document.createElement("li");
+      li.className = "story" + (winner === idx ? " winner" : "");
+      li.innerHTML =
+        '<div class="story-head"><b class="story-name"></b><span class="story-votes"></span></div>' +
+        '<p class="story-text"></p>' +
+        '<div class="story-tr" hidden></div>' +
+        '<div class="story-actions"><button class="ghost-btn tr-btn">🔄 Retraduire</button><button class="ghost-btn vote-btn">👍 Voter</button></div>';
+      li.querySelector(".story-name").textContent = (winner === idx ? "👑 " : "") + s.name;
+      li.querySelector(".story-votes").textContent = s.votes + " vote" + (s.votes > 1 ? "s" : "");
+      li.querySelector(".story-text").textContent = s.text;
+      const tr = li.querySelector(".story-tr");
+      const showTr = () => {
+        const f = fidelity(s.text);
+        tr.hidden = false;
+        tr.innerHTML = '<span class="tr-emojis"></span><span class="pill fid"></span>';
+        tr.firstChild.textContent = f.tr || "🤷";
+        tr.lastChild.textContent = "🎯 " + f.hits + " / " + storyDraw.length + " emojis retrouvés";
+      };
+      if (s.showTr) showTr();
+      li.querySelector(".tr-btn").addEventListener("click", () => { s.showTr = true; showTr(); });
+      li.querySelector(".vote-btn").addEventListener("click", () => {
+        s.votes++;
+        li.querySelector(".story-votes").textContent = s.votes + " vote" + (s.votes > 1 ? "s" : "");
+        toast("👍 Vote pour " + s.name + " !");
+      });
+      ul.appendChild(li);
+    });
+  }
+  $("#storyRoll").addEventListener("click", rollStory);
+  $("#storyAdd").addEventListener("click", () => {
+    const text = $("#storyText").value.trim();
+    if (!storyDraw.length) { toast("Tire d'abord tes 5 emojis 🎲"); return; }
+    if (text.length < 10) { toast("Ton histoire est un peu courte… ✍️"); $("#storyText").focus(); return; }
+    const name = $("#storyName").value.trim() || "Joueur " + (stories.length + 1);
+    stories.push({ name, text, votes: 0, showTr: false });
+    $("#storyText").value = "";
+    $("#storyName").value = "";
+    renderStories();
+    $("#storyFeedback").textContent = "📜 " + stories.length + " histoire" + (stories.length > 1 ? "s" : "") + " — passe le téléphone au suivant !";
+  });
+  $("#storyReveal").addEventListener("click", () => {
+    if (stories.length < 2) { toast("Il faut au moins 2 histoires pour voter 🗳️"); return; }
+    // le plus de votes gagne ; en cas d'égalité, la meilleure fidélité aux emojis
+    let best = 0;
+    stories.forEach((s, i) => {
+      const b = stories[best];
+      if (s.votes > b.votes || (s.votes === b.votes && fidelity(s.text).hits > fidelity(b.text).hits)) best = i;
+    });
+    stories.forEach((s) => (s.showTr = true));
+    renderStories(best);
+    clearInterval(storyTimer);
+    $("#storyFeedback").textContent = "🏆 Bravo " + stories[best].name + " ! Histoire gagnante 🎉";
+    celebrate("🏆🎉👑" + storyDraw.map((x) => x.e).join(""));
+  });
+  $("#storyNew").addEventListener("click", () => {
+    stories = [];
+    renderStories();
+    rollStory();
+    toast("Nouvelle manche ! 🎲");
+  });
+
+  /* =========================================================
+     MINI-JEU 4 : PAIRES (emoji ↔ mot)
+     ========================================================= */
+  const memPool = playable(["animaux", "nourriture", "activites", "lieux", "objets", "meteo", "metiers", "emotions"])
+    .filter((it) => it.label.length <= 11 && !/['’ ]/.test(it.label));
+  let memOpen = [], memLock = false, memMoves = 0, memFound = 0;
+  let memBest = store.get("memBest", null);
+  $("#memBest").textContent = memBest ?? "–";
+
+  function newMemory() {
+    memOpen = []; memLock = false; memMoves = 0; memFound = 0;
+    $("#memMoves").textContent = 0; $("#memFound").textContent = 0; $("#memFeedback").textContent = "";
+    const items = shuffle(memPool).slice(0, 8);
+    const cards = shuffle(items.flatMap((it, id) => [{ id, face: it.e, kind: "emoji" }, { id, face: it.label, kind: "word" }]));
+    const grid = $("#memGrid");
+    grid.innerHTML = "";
+    cards.forEach((c) => {
+      const b = document.createElement("button");
+      b.className = "mem-card " + c.kind;
+      b.setAttribute("aria-label", "Carte cachée");
+      b.innerHTML = '<span class="mem-inner"><span class="mem-back">❔</span><span class="mem-front"></span></span>';
+      b.querySelector(".mem-front").textContent = c.face;
+      b.addEventListener("click", () => flipCard(b, c));
+      grid.appendChild(b);
+    });
+  }
+  function flipCard(b, c) {
+    if (memLock || b.classList.contains("open") || b.classList.contains("done")) return;
+    b.classList.add("open");
+    b.setAttribute("aria-label", c.face);
+    memOpen.push({ b, c });
+    if (memOpen.length < 2) return;
+    memMoves++;
+    $("#memMoves").textContent = memMoves;
+    const [x, y] = memOpen;
+    memOpen = [];
+    if (x.c.id === y.c.id) {
+      x.b.classList.add("done"); y.b.classList.add("done");
+      memFound++;
+      $("#memFound").textContent = memFound;
+      if (memFound === 8) {
+        let msg = "🎉 Gagné en " + memMoves + " coups !";
+        if (memBest === null || memMoves < memBest) { memBest = memMoves; store.set("memBest", memBest); $("#memBest").textContent = memBest; msg += " Nouveau record 🏆"; }
+        $("#memFeedback").textContent = msg;
+        celebrate("🎉🃏✨");
+      }
+    } else {
+      memLock = true;
+      x.b.classList.add("miss"); y.b.classList.add("miss");
+      setTimeout(() => {
+        [x, y].forEach((o) => { o.b.classList.remove("open", "miss"); o.b.setAttribute("aria-label", "Carte cachée"); });
+        memLock = false;
+      }, 850);
+    }
+  }
+  $("#memNew").addEventListener("click", newMemory);
+
+  /* =========================================================
+     MINI-JEU 5 : L'INTRUS
+     ========================================================= */
+  const INT_CATS = ["emotions", "animaux", "meteo", "nourriture", "activites", "lieux", "objets", "metiers", "drapeaux", "couleurs"];
+  const intPool = Object.fromEntries(INT_CATS.map((c) => [c, playable([c])]));
+  let intScore = 0, intRound = 0, intBusy = false;
+  let intBest = store.get("intBest", 0);
+  $("#intBest").textContent = intBest;
+
+  function intNext() {
+    intRound++;
+    if (intRound > 10) return intEnd();
+    intBusy = false;
+    $("#intRound").textContent = intRound;
+    $("#intFeedback").textContent = "";
+    const [famille, autre] = shuffle(INT_CATS);
+    const trio = shuffle(intPool[famille]).slice(0, 3);
+    const odd = pick(intPool[autre]);
+    const box = $("#intChoices");
+    box.innerHTML = "";
+    shuffle([...trio.map((it) => ({ it, odd: false })), { it: odd, odd: true }]).forEach(({ it, odd: isOdd }) => {
+      const b = document.createElement("button");
+      b.textContent = it.e;
+      b.title = it.label;
+      b.addEventListener("click", () => {
+        if (intBusy) return;
+        intBusy = true;
+        $$("#intChoices button").forEach((x) => (x.disabled = true));
+        if (isOdd) {
+          intScore++;
+          b.classList.add("good");
+          $("#intScore").textContent = intScore;
+          $("#intFeedback").textContent = "✅ Bien vu ! " + it.e + " (" + catName(autre) + ") — les autres : " + catName(famille);
+        } else {
+          b.classList.add("bad");
+          [...box.children].find((x) => x.textContent === odd.e).classList.add("good");
+          $("#intFeedback").textContent = "❌ Raté : l'intrus était " + odd.e + " (" + catName(autre) + ")";
+        }
+        setTimeout(intNext, 1600);
+      });
+      box.appendChild(b);
+    });
+  }
+  function intEnd() {
+    let msg = "🏁 Terminé : " + intScore + " / 10";
+    if (intScore > intBest) { intBest = intScore; store.set("intBest", intBest); $("#intBest").textContent = intBest; msg += " — nouveau record ! 🏆"; }
+    $("#intFeedback").textContent = msg;
+    $("#intChoices").innerHTML = "";
+    $("#intNew").hidden = false;
+    if (intScore >= 7) celebrate("🕵️🏆✨");
+  }
+  function intStart() {
+    intScore = 0; intRound = 0;
+    $("#intScore").textContent = 0;
+    $("#intNew").hidden = true;
+    intNext();
+  }
+  $("#intNew").addEventListener("click", intStart);
+
+  /* ---------- sélection du jeu ---------- */
+  const started = new Set(["rebus"]);
   $$(".game-btn").forEach((b) => b.addEventListener("click", () => {
+    const g = b.dataset.game;
     $$(".game-btn").forEach((x) => x.classList.toggle("active", x === b));
-    $("#game-rebus").hidden = b.dataset.game !== "rebus";
-    $("#game-express").hidden = b.dataset.game !== "express";
-    if (b.dataset.game !== "express" && expTimer) expEnd();
+    $$("#panel-jeux .game").forEach((el) => (el.hidden = el.id !== "game-" + g));
+    if (g !== "express" && expTimer) expEnd();
+    if (!started.has(g)) {
+      started.add(g);
+      if (g === "histoire") rollStory();
+      if (g === "paires") newMemory();
+      if (g === "intrus") intStart();
+    }
   }));
 
   /* =========================================================

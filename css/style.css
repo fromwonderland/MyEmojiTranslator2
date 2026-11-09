@@ -236,6 +236,65 @@ textarea::placeholder { color: #a79fb8; font-size: 1rem; }
 .ghost-btn:hover { background: #f3efff; }
 .big-btn { padding: 12px 22px; font-size: 1.1rem; font-weight: 600; background: var(--pink); }
 .feedback { text-align: center; min-height: 1.5em; font-weight: 500; margin: 14px 0 0; }
+.game-pick { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.game-intro { text-align: center; margin: 4px 0 14px; color: #3b3450; }
+.game-intro small { color: var(--muted); }
+
+/* ---------- Histoire en emojis ---------- */
+.story-draw { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 6px 0 4px; min-height: 92px; }
+.draw-card {
+  width: 84px; padding: 10px 4px 8px; border: var(--border); border-radius: 18px; background: #fff;
+  box-shadow: var(--shadow-sm); display: flex; flex-direction: column; align-items: center; gap: 4px;
+  animation: deal .45s cubic-bezier(.2, 1.5, .4, 1) both;
+}
+.draw-card:nth-child(odd) { background: #fff4fb; transform: rotate(-3deg); }
+.draw-card:nth-child(even) { background: #f0fbff; transform: rotate(3deg); }
+.draw-card span { font-size: 2.4rem; line-height: 1; }
+.draw-card small { font-size: .72rem; color: var(--muted); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.draw-card:hover { background: #fff7cf; }
+@keyframes deal { from { opacity: 0; transform: translateY(-30px) rotate(-25deg) scale(.6); } }
+.timer-pick { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
+.timer-pick .chip.active { background: var(--lilac); }
+.story-timer { margin-left: 6px; font-size: 1.1rem; }
+.story-timer.urgent { color: #e0405a; animation: pulse-pop .5s ease-in-out infinite alternate; }
+.story-form { display: grid; gap: 8px; max-width: 560px; margin: 16px auto 0; }
+.story-form input, .story-form textarea {
+  border: var(--border); border-radius: 14px; padding: 10px 12px; font-family: inherit; font-size: 1rem;
+  background: #fffdf7; outline: none; resize: vertical;
+}
+.story-form input:focus, .story-form textarea:focus { box-shadow: 0 0 0 4px rgba(185, 166, 255, .55); }
+.story-form .big-btn { justify-self: center; }
+.stories { list-style: none; padding: 0; margin: 18px auto 0; display: grid; gap: 10px; max-width: 640px; }
+.story { border: var(--border); border-radius: 16px; padding: 12px 14px; background: #fffdf7; box-shadow: var(--shadow-sm); animation: pop .3s ease-out; }
+.story.winner { background: #fff7cf; box-shadow: 0 0 0 4px var(--yellow), var(--shadow); }
+.story-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.story-votes { font-size: .9rem; color: var(--muted); }
+.story-text { margin: 6px 0 8px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.story-tr { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; padding: 8px 10px; background: #f3efff; border-radius: 12px; }
+.tr-emojis { font-size: 1.3rem; overflow-wrap: anywhere; flex: 1 1 200px; }
+.fid { font-size: .85rem; background: #fff; }
+.story-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.story-actions .ghost-btn { padding: 6px 12px; font-size: .9rem; }
+
+/* ---------- Paires ---------- */
+.mem-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 520px; margin: 16px auto 0; }
+.mem-card { aspect-ratio: 1 / 1; padding: 0; border: none; background: none; perspective: 600px; }
+.mem-inner {
+  position: relative; display: block; width: 100%; height: 100%;
+  transition: transform .4s cubic-bezier(.3, 1.4, .5, 1); transform-style: preserve-3d;
+}
+.mem-card.open .mem-inner, .mem-card.done .mem-inner { transform: rotateY(180deg); }
+.mem-back, .mem-front {
+  position: absolute; inset: 0; display: grid; place-items: center; border: var(--border); border-radius: 14px;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: var(--shadow-sm);
+}
+.mem-back { background: repeating-linear-gradient(45deg, var(--lilac), var(--lilac) 8px, #c9baff 8px, #c9baff 16px); font-size: 1.6rem; }
+.mem-front { background: #fff; transform: rotateY(180deg); padding: 4px; text-align: center; }
+.mem-card.emoji .mem-front { font-size: clamp(1.8rem, 7vw, 2.6rem); }
+.mem-card.word .mem-front { font-size: clamp(.75rem, 2.6vw, 1rem); font-weight: 600; overflow-wrap: anywhere; line-height: 1.1; }
+.mem-card.done .mem-front { background: var(--mint); }
+.mem-card.miss .mem-front { background: #ff9aa2; }
+.mem-card:focus-visible { outline: 3px solid var(--sky); outline-offset: 3px; border-radius: 14px; }
 
 /* ---------- idées ---------- */
 .daily {
@@ -319,6 +378,10 @@ textarea::placeholder { color: #a79fb8; font-size: 1rem; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); max-height: 60vh; }
   .emo span { font-size: 1.7rem; }
   .game-pick { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .game-pick .game-btn:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .draw-card { width: calc(33% - 8px); max-width: 96px; }
+  .story-draw { gap: 8px; }
+  .mem-grid { gap: 6px; }
   .game-btn { padding: 10px; }
   .game-btn small { display: none; }
   .choices { grid-template-columns: 1fr; }

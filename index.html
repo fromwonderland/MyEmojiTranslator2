@@ -93,6 +93,9 @@
       <div class="game-pick">
         <button class="game-btn active" data-game="rebus"><b>🧩 Rébus</b><small>Devine l'expression cachée</small></button>
         <button class="game-btn" data-game="express"><b>⚡ Emoji express</b><small>30 s pour trouver le bon emoji</small></button>
+        <button class="game-btn" data-game="histoire"><b>📜 Histoire en emojis</b><small>Jeu de soirée : écrivez, votez !</small></button>
+        <button class="game-btn" data-game="paires"><b>🃏 Paires</b><small>Retrouve chaque emoji et son mot</small></button>
+        <button class="game-btn" data-game="intrus"><b>🕵️ L'intrus</b><small>Lequel n'est pas de la famille ?</small></button>
       </div>
 
       <div class="game" id="game-rebus">
@@ -121,6 +124,62 @@
           <button class="big-btn" id="expStart">▶️ Lancer la partie</button>
         </div>
         <p class="feedback" id="expFeedback"></p>
+      </div>
+
+      <!-- Histoire en emojis -->
+      <div class="game" id="game-histoire" hidden>
+        <p class="game-intro">Tirez 5 emojis, chacun écrit une histoire qui les utilise <b>tous</b>, puis on vote ! 🗳️<br><small>Astuce : touche un emoji pour le changer.</small></p>
+        <div class="story-draw" id="storyDraw"></div>
+        <div class="game-actions">
+          <button class="big-btn" id="storyRoll">🎲 Tirer 5 emojis</button>
+        </div>
+        <div class="timer-pick" role="radiogroup" aria-label="Chrono d'écriture">
+          <span>⏱️ Chrono :</span>
+          <button class="chip active" data-sec="0" role="radio" aria-checked="true">Aucun</button>
+          <button class="chip" data-sec="60" role="radio" aria-checked="false">1 min</button>
+          <button class="chip" data-sec="120" role="radio" aria-checked="false">2 min</button>
+          <b class="story-timer" id="storyTimer" hidden></b>
+        </div>
+        <div class="story-form">
+          <input id="storyName" type="text" maxlength="20" placeholder="Ton prénom (ex : Camille)" autocomplete="off">
+          <textarea id="storyText" rows="3" maxlength="500" placeholder="Il était une fois…"></textarea>
+          <button class="big-btn" id="storyAdd">✍️ Ajouter mon histoire</button>
+        </div>
+        <ul class="stories" id="stories"></ul>
+        <div class="game-actions">
+          <button class="ghost-btn" id="storyReveal">🏆 Révéler le gagnant</button>
+          <button class="ghost-btn" id="storyNew">🔁 Nouvelle manche</button>
+        </div>
+        <p class="feedback" id="storyFeedback"></p>
+      </div>
+
+      <!-- Paires -->
+      <div class="game" id="game-paires" hidden>
+        <div class="score-row">
+          <span class="pill">🔁 Coups : <b id="memMoves">0</b></span>
+          <span class="pill">✅ Paires : <b id="memFound">0</b> / 8</span>
+          <span class="pill">⭐ Record : <b id="memBest">–</b></span>
+        </div>
+        <div class="mem-grid" id="memGrid"></div>
+        <div class="game-actions">
+          <button class="ghost-btn" id="memNew">🔀 Nouvelle partie</button>
+        </div>
+        <p class="feedback" id="memFeedback"></p>
+      </div>
+
+      <!-- L'intrus -->
+      <div class="game" id="game-intrus" hidden>
+        <div class="score-row">
+          <span class="pill">🏆 Score : <b id="intScore">0</b></span>
+          <span class="pill">🎯 Manche : <b id="intRound">1</b> / 10</span>
+          <span class="pill">⭐ Record : <b id="intBest">0</b></span>
+        </div>
+        <p class="game-intro">Trois emojis sont de la même famille… trouve l'intrus ! 🔎</p>
+        <div class="choices emoji-choices" id="intChoices"></div>
+        <div class="game-actions">
+          <button class="big-btn" id="intNew" hidden>🔁 Rejouer</button>
+        </div>
+        <p class="feedback" id="intFeedback"></p>
       </div>
     </section>
 
