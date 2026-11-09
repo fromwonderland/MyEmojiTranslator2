@@ -61,6 +61,16 @@ window.EMOJI_DICT = [
       ["👽", "alien|extraterrestre|ovni"],
       ["💩", "caca|nul|nulle"],
       ["🤡", "clown|ridicule|cirque"],
+      ["🙃", "ironie|ironique|à l'envers|tête à l'envers"],
+      ["🥲", "ému|émue|sourire triste|larme de joie|touché|touchée"],
+      ["🫠", "fondre|je fonds|liquéfié|gênance"],
+      ["🤭", "pouffer|glousser|petit rire|hihi"],
+      ["🫣", "honte|j'ose pas|regarder en cachette|cacher les yeux"],
+      ["🫡", "à vos ordres|oui chef|respect|salut militaire"],
+      ["😮‍💨", "souffler|soupir|ouf|épuisé|épuisée"],
+      ["🤓", "intello|geek|binoclard|premier de la classe"],
+      ["🥸", "déguisement|déguisé|déguisée|incognito"],
+      ["😶‍🌫️", "dans le brouillard|paumé|paumée|perdu|perdue|à l'ouest"],
     ]
   },
   {
@@ -82,7 +92,7 @@ window.EMOJI_DICT = [
       ["⭐", "étoile|etoile|favori"],
       ["🔥", "feu|brûler|bruler|chaud bouillant|incendie|top"],
       ["⚡", "éclair|eclair|électricité|énergie|energie|rapide comme l'éclair"],
-      ["✅", "oui|ok|d'accord|valider|vrai|correct|fait|terminé"],
+      ["✅", "oui|ok|d'accord|valider|vrai|correct|terminé"],
       ["❌", "non|faux|erreur|interdit|annuler"],
       ["🚫", "pas|ne|jamais|rien|aucun|aucune|personne ne|interdire"],
       ["❓", "quoi|qui|quel|quelle|quels|quelles|où|ou bien|est-ce que"],
@@ -200,6 +210,32 @@ window.EMOJI_DICT = [
       ["🦒", "girafe"],
       ["🦖", "dinosaure|dino"],
       ["🐉", "dragon"],
+      ["🐺", "loup|louve"],
+      ["🦝", "raton laveur"],
+      ["🦓", "zèbre|zebre"],
+      ["🦘", "kangourou"],
+      ["🦥", "paresseux|paresse|flemme|la flemme|flemmard"],
+      ["🦦", "loutre"],
+      ["🦔", "hérisson|herisson"],
+      ["🐿️", "écureuil|ecureuil"],
+      ["🦇", "chauve-souris|vampire"],
+      ["🦌", "cerf|biche|renne"],
+      ["🐑", "mouton|brebis|agneau"],
+      ["🐐", "chèvre|chevre|bouc"],
+      ["🦩", "flamant rose|flamant"],
+      ["🦚", "paon|frimer|frimeur"],
+      ["🦜", "perroquet|répéter bêtement"],
+      ["🦢", "cygne"],
+      ["🦅", "aigle|rapace"],
+      ["🐊", "crocodile|alligator"],
+      ["🦭", "phoque"],
+      ["🦀", "crabe"],
+      ["🦞", "homard|langouste"],
+      ["🦐", "crevette|crevettes"],
+      ["🐜", "fourmi|fourmis"],
+      ["🐛", "chenille|ver"],
+      ["🪲", "scarabée|scarabee|insecte"],
+      ["🐹", "hamster|cochon d'inde"],
       ["🌸", "fleur|fleurs|printemps"],
       ["🌹", "rose|romantique"],
       ["🌻", "tournesol"],
@@ -279,6 +315,21 @@ window.EMOJI_DICT = [
       ["🍺", "bière|biere|apéro|apero"],
       ["🍷", "vin|vin rouge"],
       ["🥂", "champagne|santé|trinquer|tchin"],
+      ["🥨", "bretzel"],
+      ["🧇", "gaufre|gaufres"],
+      ["🥯", "bagel"],
+      ["🫓", "galette|pain pita"],
+      ["🥟", "ravioli|raviolis|dim sum"],
+      ["🍱", "bento|plateau repas"],
+      ["🍛", "curry"],
+      ["🥘", "paella|plat mijoté|mijoter"],
+      ["🫕", "fondue|raclette|fondue savoyarde"],
+      ["🧈", "beurre"],
+      ["🍮", "flan|crème caramel|crème brûlée"],
+      ["🧁", "cupcake|muffin"],
+      ["🥧", "tarte|quiche"],
+      ["🍾", "bouteille|sabler le champagne|déboucher"],
+      ["🥜", "cacahuète|cacahuete|cacahuètes"],
       ["🍹", "cocktail|vacances à la plage"],
       ["🥤", "soda|boisson|boire"],
       ["🍽️", "manger|repas|dîner|diner|déjeuner|dejeuner|restaurant|faim|bouffer"],
@@ -323,6 +374,18 @@ window.EMOJI_DICT = [
       ["📷", "photo|photographier|selfie"],
       ["🏕️", "camping|camper"],
       ["🛍️", "commander|commande|shopping|acheter|achats|magasin|courses"],
+      ["🏇", "équitation|equitation|course de chevaux|jockey"],
+      ["🧗", "escalade|grimper|grimpe"],
+      ["🤸", "gymnastique|gym|roue|acrobatie"],
+      ["🏌️", "golfeur"],
+      ["⛳", "golf"],
+      ["🛹", "skate|skateboard|planche à roulettes"],
+      ["⛸️", "patin|patinage|patiner|patinoire"],
+      ["🤺", "escrime|épée"],
+      ["🏋️", "musculation|muscu|haltère|soulever"],
+      ["🥋", "judo|karaté|karate|arts martiaux"],
+      ["🎳", "bowling|quilles"],
+      ["🏒", "hockey"],
     ]
   },
   {
@@ -417,6 +480,22 @@ window.EMOJI_DICT = [
     ]
   },
   {
+    id: "couleurs", nom: "Couleurs", icone: "🎨",
+    items: [
+      ["🔴", "rouge|rouges"],
+      ["🟠", "couleur orange|orangé|orangée"],
+      ["🟡", "jaune|jaunes|doré|dorée"],
+      ["🟢", "vert|verte|verts|vertes"],
+      ["🔵", "bleu|bleue|bleus|bleues"],
+      ["🟣", "violet|violette|violets|violettes|mauve"],
+      ["🟤", "marron|brun|brune|bruns|brunes"],
+      ["⚫", "noir|noire|noirs|noires"],
+      ["⚪", "blanc|blanche|blancs|blanches"],
+      ["🩷", "couleur rose|rosé|rosée"],
+      ["🩶", "gris|grise|grises"],
+    ]
+  },
+  {
     id: "nombres", nom: "Nombres & temps", icone: "🔢",
     items: [
       ["0️⃣", "zéro|zero"],
@@ -439,15 +518,12 @@ window.EMOJI_DICT = [
     ]
   }
 ];
-
 /* Mots ignorés à la traduction (articles, prépositions…) */
 window.STOPWORDS = new Set((
   "le la les l' un une des du de d' au aux à a ce cet cette ces se s' en y " +
   "qu' que qui dont mais ou car ni donc est-ce sur sous dans par pour chez " +
   "très tres trop si c' ça ca cela ceci là la-bas ici"
 ).split(" "));
-
-
 /* Verbes irréguliers (formes conjuguées → infinitif) */
 window.IRREGULIERS = {
   "suis": "être", "es": "être", "est": "être", "sommes": "être", "êtes": "être", "sont": "être",
@@ -483,7 +559,6 @@ window.IRREGULIERS = {
   "entends": "entendre", "entend": "entendre", "entendu": "entendre",
   "pleut": "pleuvoir", "faut": "falloir"
 };
-
 /* Verbes sans emoji propre → synonyme qui en a un */
 window.VERBES_ALIAS = {
   "être": null, "avoir": null, "faire": null, "falloir": null,
@@ -491,7 +566,6 @@ window.VERBES_ALIAS = {
   "vivre": "🌱", "naître": "👶", "venir": "👋", "mettre": "👕",
   "adorer": "😍", "kiffer": "😍"
 };
-
 /* Phrases d'exemple pour l'onglet suggestions */
 window.SUGGESTIONS = [
   "Je t'aime de tout mon cœur",
@@ -509,7 +583,6 @@ window.SUGGESTIONS = [
   "Je pars en vacances en avion",
   "Le cuisinier prépare des pâtes au fromage",
 ];
-
 /* Rébus pour le mini-jeu « Devine la phrase » */
 window.REBUS = [
   { e: "🌧️🐱🐶", r: "Il pleut des cordes", choix: ["Il pleut des cordes", "Les chats et les chiens", "Un temps de chien", "La pluie et le beau temps"], indice: "En anglais on dit qu'il pleut des chats et des chiens…" },
