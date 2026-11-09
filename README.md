@@ -10,7 +10,7 @@ Ouvre `index.html` dans ton navigateur (double-clic). C'est tout !
 - 🔤 Mode **Mixte** (garde les mots inconnus) ou **100 % emoji**
 - 🔄 Décodage emoji → français
 - 📋 Boutons copier / effacer sur les deux champs, 🎲 phrase au hasard
-- 📖 Dictionnaire de ~560 emojis en 13 catégories (dont drapeaux, fêtes & saisons, argot) avec recherche : un clic l'ajoute au champ emoji
+- 📖 Dictionnaire de ~595 emojis en 15 catégories (dont métiers, météo, drapeaux, fêtes & saisons, argot) avec recherche : un clic l'ajoute au champ emoji
 - 🎮 Mini-jeux : **Rébus** (devine l'expression) et **Emoji express** (30 s chrono, record sauvegardé)
 - 💡 Emoji du jour, phrases à essayer, astuces
 - 🕘 Historique local (stocké seulement dans le navigateur)
