@@ -226,13 +226,83 @@ textarea::placeholder { color: #a79fb8; font-size: 1rem; }
 .foot { position: relative; z-index: 1; text-align: center; color: var(--muted); padding: 24px 16px 40px; font-size: .9rem; }
 
 /* ---------- mobile ---------- */
+.tab-label { pointer-events: none; }
 @media (max-width: 560px) {
-  .card { padding: 14px; box-shadow: 4px 4px 0 var(--ink); }
-  .middle { justify-content: center; }
-  .game-pick, .choices { grid-template-columns: 1fr; }
+  body { padding-bottom: calc(84px + env(safe-area-inset-bottom)); }
+  .top { padding: 18px 16px 2px; }
+  .logo { gap: 10px; }
+  .logo-emoji { width: 50px; height: 50px; font-size: 2rem; border-radius: 14px; }
+  .tagline { margin-top: 8px; font-size: 1rem; }
+  .wrap { padding: 12px 12px 16px; }
+  .card { padding: 12px; box-shadow: 4px 4px 0 var(--ink); border-radius: 20px; }
+  .field { padding: 10px 12px; }
+
+  /* barre d'outils : libellé à gauche, boutons à droite sur la même ligne */
+  .field-head { flex-wrap: nowrap; }
+  .field-head label { font-size: 1rem; white-space: nowrap; }
+  .tools { gap: 5px; }
+  .icon-btn { width: 40px; height: 40px; }
+  .copy-btn { height: 40px; width: 40px; padding: 0; font-size: 0; }
+  .copy-btn::before { content: "📋"; font-size: 1.1rem; }
+  .copy-btn.done::before { content: "✅"; }
+
+  textarea { font-size: 1.1rem; min-height: 96px; }
+  #emojiOutput { font-size: 1.6rem; }
+
+  .middle { justify-content: center; gap: 8px; margin: 12px 0; }
+  .mode-switch { width: 100%; }
+  .mode { flex: 1; padding: 10px 6px; }
+  .swap-btn { width: 100%; padding: 10px; }
+  .meter-bar { width: 90px; }
+
+  /* onglets → barre de navigation fixe en bas de l'écran */
+  .tabs {
+    position: fixed; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom)); z-index: 20;
+    margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+    background: #fff; border: var(--border); border-radius: 20px; box-shadow: var(--shadow); padding: 6px;
+  }
+  .tab {
+    border: 2px solid transparent; box-shadow: none; border-radius: 14px; padding: 6px 2px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: .78rem; line-height: 1.1;
+  }
+  .tab .tab-icon { font-size: 1.35rem; }
+  .tab.active { border-color: var(--ink); }
+  .panel { scroll-margin-top: 12px; }
+
+  .dico-top .hint { display: none; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); max-height: 60vh; }
+  .emo span { font-size: 1.7rem; }
+  .game-pick { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .game-btn { padding: 10px; }
+  .game-btn small { display: none; }
+  .choices { grid-template-columns: 1fr; }
   .emoji-choices { grid-template-columns: 1fr 1fr; }
-  .grid { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); }
-  .copy-btn { padding: 0 10px; }
+  .rebus-emoji, .express-word { margin: 14px auto; padding: 14px; }
+  .daily { padding: 12px 14px; gap: 12px; }
+  .daily-emoji { font-size: 2.4rem; }
+  .toast { bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .foot { padding: 16px 16px 8px; }
+}
+@media (min-width: 561px) {
+  .tab .tab-icon { margin-right: 6px; }
+}
+/* très petits écrans (iPhone SE, vieux Android…) */
+@media (max-width: 370px) {
+  .field-head { gap: 4px; }
+  .field-head label { font-size: .95rem; }
+  .field-head .flag { display: none; }
+  .tools { gap: 4px; }
+  .icon-btn, .copy-btn { width: 36px; height: 38px; }
+  .mode { font-size: .85rem; }
+  .tab { font-size: .7rem; }
+}
+
+/* écrans tactiles : pas d'effet de survol qui reste « collé » */
+@media (hover: none) {
+  .tab:hover:not(.active), .chip:hover:not(.active), .ghost-btn:hover, .icon-btn:hover:not(.listening),
+  .choices button:hover:not(.good):not(.bad) { background: #fff; }
+  .emo:hover { transform: none; border-color: transparent; background: #faf7ff; }
+  .emo:active { transform: scale(.94); background: #fff7cf; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

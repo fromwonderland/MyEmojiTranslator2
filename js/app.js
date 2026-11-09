@@ -201,7 +201,12 @@
     store.set("tab", id);
     if (id === "histo") renderHisto();
   }
-  $$(".tab").forEach((t) => t.addEventListener("click", () => showTab(t.dataset.tab)));
+  const isMobile = () => window.matchMedia("(max-width: 560px)").matches;
+  $$(".tab").forEach((t) => t.addEventListener("click", () => {
+    showTab(t.dataset.tab);
+    // sur mobile, la barre d'onglets est en bas : on amène le panneau à l'écran
+    if (isMobile()) document.getElementById("panel-" + t.dataset.tab).scrollIntoView({ behavior: "smooth", block: "start" });
+  }));
 
   /* =========================================================
      DICTIONNAIRE
@@ -223,6 +228,8 @@
   });
 
   const noAcc = (s) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  // mots-clés à afficher, sans les variantes sans accent (« lèvres, levres » → « lèvres »)
+  const shownKeys = (it) => it.keys.filter((k, i) => it.keys.findIndex((x) => noAcc(x) === noAcc(k)) === i);
   function renderGrid() {
     const q = noAcc($("#dicoSearch").value.trim());
     const list = T.all.filter((it) =>
@@ -237,7 +244,7 @@
     list.forEach((it) => {
       const b = document.createElement("button");
       b.className = "emo";
-      b.title = it.keys.slice(0, 6).join(", ");
+      b.title = shownKeys(it).slice(0, 6).join(", ");
       b.innerHTML = "<span></span><small></small>";
       b.firstChild.textContent = it.e;
       b.lastChild.textContent = it.label;
@@ -366,7 +373,8 @@
     const seed = d.getFullYear() * 1000 + Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5);
     const it = T.all[(seed * 7919) % T.all.length];
     $("#dailyEmoji").textContent = it.e;
-    $("#dailyText").textContent = "« " + it.label + " » — aussi : " + it.keys.slice(1, 4).join(", ") + (it.keys.length > 1 ? "" : "…");
+    const others = shownKeys(it).slice(1, 4);
+    $("#dailyText").textContent = "« " + it.label + " »" + (others.length ? " — aussi : " + others.join(", ") : "");
   })();
   const sug = $("#suggestions");
   window.SUGGESTIONS.forEach((p) => {

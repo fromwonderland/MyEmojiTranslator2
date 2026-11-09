@@ -2,7 +2,10 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffd84d">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Traduc'Moji</title>
   <meta name="description" content="Traducteur de texte français en emojis, avec dictionnaire et mini-jeux.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤪</text></svg>">
@@ -69,10 +72,10 @@
 
     <!-- ================= ONGLETS ================= -->
     <nav class="tabs" role="tablist">
-      <button class="tab active" role="tab" data-tab="dico" aria-selected="true">📖 Dico</button>
-      <button class="tab" role="tab" data-tab="jeux" aria-selected="false">🎮 Mini-jeux</button>
-      <button class="tab" role="tab" data-tab="idees" aria-selected="false">💡 Idées</button>
-      <button class="tab" role="tab" data-tab="histo" aria-selected="false">🕘 Historique</button>
+      <button class="tab active" role="tab" data-tab="dico" aria-selected="true"><span class="tab-icon">📖</span><span class="tab-label">Dico</span></button>
+      <button class="tab" role="tab" data-tab="jeux" aria-selected="false"><span class="tab-icon">🎮</span><span class="tab-label">Jeux</span></button>
+      <button class="tab" role="tab" data-tab="idees" aria-selected="false"><span class="tab-icon">💡</span><span class="tab-label">Idées</span></button>
+      <button class="tab" role="tab" data-tab="histo" aria-selected="false"><span class="tab-icon">🕘</span><span class="tab-label">Historique</span></button>
     </nav>
 
     <!-- Dictionnaire -->
